@@ -1,15 +1,18 @@
 {
-  "name": "example",
+  "name": "wake-up",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "Cheng-Hsuan Han",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "format": "prettier --write .",
-    "lint": "eslint .",
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky install",
+    "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview",
+    "format": "prettier --write .",
+    "lint": "eslint .",
     "test:e2e": "playwright test tests/e2e"
   },
   "dependencies": {
