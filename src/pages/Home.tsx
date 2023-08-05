@@ -1,32 +1,101 @@
-import { useState } from 'preact/hooks';
-import preactLogo from '../assets/preact.svg';
-import viteLogo from '/vite.svg';
+import { useEffect, useState } from 'preact/hooks';
+import type { JSX } from 'preact';
 
-export function Home() {
-  const [count, setCount] = useState(0);
+const RANDOM_INT_RANGE = {
+  max: 20,
+  min: 1,
+};
+
+const generateRandomInteger = ({ min, max }: Record<string, number>) => {
+  const minInt = Math.ceil(min);
+  const maxInt = Math.floor(max);
+  return Math.floor(Math.random() * (maxInt - minInt + 1)) + minInt;
+};
+
+export const ids = {
+  answer: 'answer',
+  baseNumber: 'baseNumber',
+  multiplier: 'multiplier',
+  quiz: 'quiz',
+  submit: 'submit',
+};
+
+const Quiz = ({ baseNumber, multiplier }: Record<string, number>) => (
+  <p>
+    What is the product of{' '}
+    <span data-testid={ids.baseNumber}>{baseNumber}</span> times{' '}
+    <span data-testid={ids.multiplier}>{multiplier}</span>?
+  </p>
+);
+
+interface AnswerFormProps {
+  onClickSubmit: JSX.GenericEventHandler<HTMLButtonElement>;
+  onInputChange: JSX.GenericEventHandler<HTMLInputElement>;
+  onSubmit: JSX.GenericEventHandler<HTMLFormElement>;
+}
+
+const AnswerForm = ({
+  onClickSubmit,
+  onInputChange,
+  onSubmit,
+}: AnswerFormProps) => (
+  <form onSubmit={onSubmit}>
+    <label for={ids.answer}>Your Answer: </label>
+    <input
+      data-testid={ids.answer}
+      type="text"
+      inputMode="numeric"
+      id={ids.answer}
+      onInput={onInputChange}
+    />
+    <button data-testid={ids.submit} type="submit" onClick={onClickSubmit}>
+      Submit
+    </button>
+  </form>
+);
+
+const genQuizNumsByRange = () => ({
+  base: generateRandomInteger(RANDOM_INT_RANGE),
+  multiplier: generateRandomInteger(RANDOM_INT_RANGE),
+});
+
+export const Home = () => {
+  const [answer, setAnswer] = useState<number>(0);
+  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
+
+  const [numbers, setNumbers] = useState(genQuizNumsByRange());
+
+  useEffect(() => {
+    if (submitted && isAnswerCorrect) {
+      setNumbers(genQuizNumsByRange());
+    }
+  }, [isAnswerCorrect, submitted]);
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} class="logo" alt="Vite logo" />
-        </a>
-        <a href="https://preactjs.com" target="_blank" rel="noreferrer">
-          <img src={preactLogo} class="logo preact" alt="Preact logo" />
-        </a>
+      <h1>Wake Up!</h1>
+      <div data-testid={ids.quiz}>
+        <Quiz baseNumber={numbers.base} multiplier={numbers.multiplier} />
+        <AnswerForm
+          onSubmit={(event) => {
+            event.preventDefault();
+            setIsAnswerCorrect(answer === numbers.base * numbers.multiplier);
+          }}
+          onInputChange={(event) => {
+            setSubmitted(false);
+
+            const value = Number((event.target as HTMLInputElement).value);
+            setAnswer(value);
+          }}
+          onClickSubmit={() => {
+            setSubmitted(true);
+          }}
+        />
+        {submitted && <div>{isAnswerCorrect ? 'correct' : 'wrong'}</div>}
       </div>
-      <h1>Vite + Preact</h1>
-      <div class="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/app.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p class="read-the-docs">
-        Click on the Vite and Preact logos to learn more
-      </p>
     </>
   );
-}
+};
+
+export default Home;
