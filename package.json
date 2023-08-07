@@ -11,8 +11,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "prettier --write .",
-    "lint": "eslint .",
+    "format": "prettier --write",
+    "lint": "eslint",
     "test:e2e": "playwright test tests/e2e"
   },
   "dependencies": {
