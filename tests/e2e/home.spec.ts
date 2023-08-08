@@ -12,11 +12,11 @@ const getQuizAnswer = async (page: Page): Promise<number> => {
 
 const { beforeEach, describe } = test;
 
-describe('homepage', () => {
-  beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
+beforeEach(async ({ page }) => {
+  await page.goto('/');
+});
 
+describe('page layout', () => {
   test('has the quiz and submit button', async ({ page }) => {
     await expect(page.getByTestId(ids.quiz)).toBeVisible();
     await expect(page.getByTestId(ids.answer)).toBeEditable();
@@ -29,11 +29,17 @@ describe('homepage', () => {
     await expect(page.getByTestId(ids.indicator)).not.toBeVisible();
     await expect(page.getByTestId(ids.indicator)).not.toBeVisible();
   });
+});
+
+describe('quiz interaction', () => {
+  const fillFormThenClickSubmit = (page: Page) => async (answer: number) => {
+    await page.getByTestId(ids.answer).fill(String(answer));
+    await page.getByTestId(ids.submit).click();
+  };
 
   test('shows "correct" if given right answer', async ({ page }) => {
     const answer = await getQuizAnswer(page);
-    await page.getByTestId(ids.answer).fill(String(answer));
-    await page.getByTestId(ids.submit).click();
+    fillFormThenClickSubmit(page)(answer);
 
     expect(await page.getByTestId(ids.indicator).textContent()).toBe(
       INDICATOR_TEXT.correct
@@ -44,13 +50,23 @@ describe('homepage', () => {
 
   test('shows "wrong" otherwise', async ({ page }) => {
     const wrongAnswer = (await getQuizAnswer(page)) + 1;
-    await page.getByTestId(ids.answer).fill(String(wrongAnswer));
-    await page.getByTestId(ids.submit).click();
+    fillFormThenClickSubmit(page)(wrongAnswer);
 
     expect(await page.getByTestId(ids.indicator).textContent()).toBe(
       INDICATOR_TEXT.wrong
     );
     await page.waitForSelector(`[data-testid="${ids.indicator}"]`);
     expect(await page.getByTestId(ids.answer).inputValue()).not.toBe('');
+  });
+
+  describe('after submitting form', () => {
+    test('hides indicator upon filling answer', async ({ page }) => {
+      const answer = await getQuizAnswer(page);
+      fillFormThenClickSubmit(page)(answer);
+
+      await page.waitForSelector(`[data-testid="${ids.indicator}"]`);
+      await page.getByTestId(ids.answer).fill(String(answer));
+      await expect(page.getByTestId(ids.indicator)).not.toBeVisible();
+    });
   });
 });
