@@ -1,4 +1,4 @@
-name: Playwright Tests
+name: Unit and E2E Tests
 on:
   push:
     branches: main
@@ -31,6 +31,8 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       - name: Install dependencies
         run: pnpm install
+      - name: Run unit tests
+        run: pnpm test
       - name: Store Playwright's Version
         run: |
           PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test | grep @playwright | sed 's/.*@//')
@@ -45,7 +47,7 @@ jobs:
       - name: Install Playwright Browsers
         if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chrome
-      - name: Run Playwright tests
+      - name: Run e2e tests
         run: pnpm exec playwright test
       - uses: actions/upload-artifact@v3
         if: failure()
