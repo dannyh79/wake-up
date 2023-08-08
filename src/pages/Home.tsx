@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
+import * as utils from '../lib';
 
 const RANDOM_INT_RANGE = {
   max: 20,
@@ -9,12 +10,6 @@ const RANDOM_INT_RANGE = {
 export const INDICATOR_TEXT = {
   correct: 'correct',
   wrong: 'wrong',
-};
-
-const generateRandomInteger = ({ min, max }: Record<string, number>) => {
-  const minInt = Math.ceil(min);
-  const maxInt = Math.floor(max);
-  return Math.floor(Math.random() * (maxInt - minInt + 1)) + minInt;
 };
 
 export const ids = {
@@ -64,8 +59,8 @@ const AnswerForm = ({
 );
 
 const genQuizNumsByRange = () => ({
-  base: generateRandomInteger(RANDOM_INT_RANGE),
-  multiplier: generateRandomInteger(RANDOM_INT_RANGE),
+  base: utils.generateRandomInteger(RANDOM_INT_RANGE),
+  multiplier: utils.generateRandomInteger(RANDOM_INT_RANGE),
 });
 
 export const Home = () => {
