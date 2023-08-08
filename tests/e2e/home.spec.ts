@@ -1,5 +1,14 @@
-import { expect, test } from '@playwright/test';
-import { ids } from '../../src/pages/Home';
+import { Page, expect, test } from '@playwright/test';
+import { INDICATOR_TEXT, ids } from '../../src/pages/Home';
+
+const getQuizAnswer = async (page: Page): Promise<number> => {
+  const [baseInString, multiplierInString] = await Promise.all(
+    [ids.baseNumber, ids.multiplier].map((id) =>
+      page.getByTestId(id).textContent()
+    )
+  );
+  return Number(baseInString) * Number(multiplierInString);
+};
 
 const { beforeEach, describe } = test;
 
@@ -14,31 +23,34 @@ describe('homepage', () => {
     await expect(page.getByTestId(ids.submit)).toBeEnabled();
   });
 
-  test('does NOT show "correct" or "wrong" upon entering the page', async ({
+  test('does NOT show answer indicator upon entering the page', async ({
     page,
   }) => {
-    await expect(page.getByText('correct')).not.toBeVisible();
-    await expect(page.getByText('wrong')).not.toBeVisible();
+    await expect(page.getByTestId(ids.indicator)).not.toBeVisible();
+    await expect(page.getByTestId(ids.indicator)).not.toBeVisible();
   });
 
   test('shows "correct" if given right answer', async ({ page }) => {
-    const [baseInString, multiplierInString] = await Promise.all(
-      [ids.baseNumber, ids.multiplier].map((id) =>
-        page.getByTestId(id).textContent()
-      )
-    );
-    const answer = Number(baseInString) * Number(multiplierInString);
-
+    const answer = await getQuizAnswer(page);
     await page.getByTestId(ids.answer).fill(String(answer));
     await page.getByTestId(ids.submit).click();
 
-    await expect(page.getByText('correct')).toBeVisible();
+    expect(await page.getByTestId(ids.indicator).textContent()).toBe(
+      INDICATOR_TEXT.correct
+    );
+    await page.waitForSelector(`[data-testid="${ids.indicator}"]`);
+    expect(await page.getByTestId(ids.answer).inputValue()).toBe('');
   });
 
   test('shows "wrong" otherwise', async ({ page }) => {
-    await page.getByTestId(ids.answer).fill('foo');
+    const wrongAnswer = (await getQuizAnswer(page)) + 1;
+    await page.getByTestId(ids.answer).fill(String(wrongAnswer));
     await page.getByTestId(ids.submit).click();
 
-    await expect(page.getByText('wrong')).toBeVisible();
+    expect(await page.getByTestId(ids.indicator).textContent()).toBe(
+      INDICATOR_TEXT.wrong
+    );
+    await page.waitForSelector(`[data-testid="${ids.indicator}"]`);
+    expect(await page.getByTestId(ids.answer).inputValue()).not.toBe('');
   });
 });

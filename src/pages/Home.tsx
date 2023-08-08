@@ -6,6 +6,11 @@ const RANDOM_INT_RANGE = {
   min: 1,
 };
 
+export const INDICATOR_TEXT = {
+  correct: 'correct',
+  wrong: 'wrong',
+};
+
 const generateRandomInteger = ({ min, max }: Record<string, number>) => {
   const minInt = Math.ceil(min);
   const maxInt = Math.floor(max);
@@ -15,6 +20,7 @@ const generateRandomInteger = ({ min, max }: Record<string, number>) => {
 export const ids = {
   answer: 'answer',
   baseNumber: 'baseNumber',
+  indicator: 'indicator',
   multiplier: 'multiplier',
   quiz: 'quiz',
   submit: 'submit',
@@ -29,12 +35,14 @@ const Quiz = ({ baseNumber, multiplier }: Record<string, number>) => (
 );
 
 interface AnswerFormProps {
+  form: { answer: number };
   onClickSubmit: JSX.GenericEventHandler<HTMLButtonElement>;
   onInputChange: JSX.GenericEventHandler<HTMLInputElement>;
   onSubmit: JSX.GenericEventHandler<HTMLFormElement>;
 }
 
 const AnswerForm = ({
+  form,
   onClickSubmit,
   onInputChange,
   onSubmit,
@@ -46,6 +54,7 @@ const AnswerForm = ({
       type="text"
       inputMode="numeric"
       id={ids.answer}
+      value={form.answer}
       onInput={onInputChange}
     />
     <button data-testid={ids.submit} type="submit" onClick={onClickSubmit}>
@@ -60,7 +69,7 @@ const genQuizNumsByRange = () => ({
 });
 
 export const Home = () => {
-  const [answer, setAnswer] = useState<number>(0);
+  const [answer, setAnswer] = useState<number>(null);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
 
@@ -69,6 +78,7 @@ export const Home = () => {
   useEffect(() => {
     if (submitted && isAnswerCorrect) {
       setNumbers(genQuizNumsByRange());
+      setAnswer(null);
     }
   }, [isAnswerCorrect, submitted]);
 
@@ -78,6 +88,7 @@ export const Home = () => {
       <div data-testid={ids.quiz}>
         <Quiz baseNumber={numbers.base} multiplier={numbers.multiplier} />
         <AnswerForm
+          form={{ answer }}
           onSubmit={(event) => {
             event.preventDefault();
             setIsAnswerCorrect(answer === numbers.base * numbers.multiplier);
@@ -85,14 +96,20 @@ export const Home = () => {
           onInputChange={(event) => {
             setSubmitted(false);
 
-            const value = Number((event.target as HTMLInputElement).value);
-            setAnswer(value);
+            const inputString = (event.target as HTMLInputElement).value;
+            if (inputString !== '' && !isNaN(Number(inputString))) {
+              setAnswer(Number(inputString));
+            }
           }}
           onClickSubmit={() => {
             setSubmitted(true);
           }}
         />
-        {submitted && <div>{isAnswerCorrect ? 'correct' : 'wrong'}</div>}
+        {submitted && (
+          <div data-testid={ids.indicator}>
+            {isAnswerCorrect ? INDICATOR_TEXT.correct : INDICATOR_TEXT.wrong}
+          </div>
+        )}
       </div>
     </>
   );
