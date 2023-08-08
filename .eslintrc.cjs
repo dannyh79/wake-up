@@ -24,6 +24,7 @@ module.exports = {
     'func-style': 0,
     'id-length': 0,
     'jest/no-done-callback': 0,
+    'jest/no-focused-tests': 1,
     'jsx-quotes': ['warn', 'prefer-double'],
     'max-lines': 0,
     'max-lines-per-function': 1,
