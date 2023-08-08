@@ -1,0 +1,15 @@
+{
+  "extensionsToTreatAsEsm": [".ts"],
+  "transform": {
+    "^.+\\.[jt]sx?$": [
+      "ts-jest",
+      {
+        "useESM": true
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^(\\.\\.?\\/.+)\\.jsx?$": "$1"
+  },
+  "passWithNoTests": true
+}
