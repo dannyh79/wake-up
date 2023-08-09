@@ -89,6 +89,7 @@ export const Home = () => {
             setIsAnswerCorrect(answer === numbers.base * numbers.multiplier);
           }}
           onInputChange={(event) => {
+            setIsAnswerCorrect(null);
             setSubmitted(false);
 
             const inputString = (event.target as HTMLInputElement).value;

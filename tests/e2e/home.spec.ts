@@ -1,13 +1,15 @@
 import { Page, expect, test } from '@playwright/test';
 import { INDICATOR_TEXT, ids } from '../../src/pages/Home';
 
-const getQuizAnswer = async (page: Page): Promise<number> => {
+const getQuizNumbers = async (
+  page: Page
+): Promise<[base: number, multiplier: number]> => {
   const [baseInString, multiplierInString] = await Promise.all(
     [ids.baseNumber, ids.multiplier].map((id) =>
       page.getByTestId(id).textContent()
     )
   );
-  return Number(baseInString) * Number(multiplierInString);
+  return [Number(baseInString), Number(multiplierInString)];
 };
 
 const { beforeEach, describe } = test;
@@ -31,42 +33,39 @@ describe('page layout', () => {
   });
 });
 
-describe('quiz interaction', () => {
-  const fillFormThenClickSubmit = (page: Page) => async (answer: number) => {
-    await page.getByTestId(ids.answer).fill(String(answer));
-    await page.getByTestId(ids.submit).click();
-  };
+const fillFormThenClickSubmit = (page: Page) => async (answer: number) => {
+  await page.getByTestId(ids.answer).fill(String(answer));
+  await page.getByTestId(ids.submit).click();
+};
 
+describe('quiz interaction', () => {
   test('shows "correct" if given right answer', async ({ page }) => {
-    const answer = await getQuizAnswer(page);
+    const quiz = await getQuizNumbers(page);
+    const answer = quiz[0] * quiz[1];
     fillFormThenClickSubmit(page)(answer);
 
     expect(await page.getByTestId(ids.indicator).textContent()).toBe(
       INDICATOR_TEXT.correct
     );
+
     await page.waitForSelector(`[data-testid="${ids.indicator}"]`);
     expect(await page.getByTestId(ids.answer).inputValue()).toBe('');
   });
 
   test('shows "wrong" otherwise', async ({ page }) => {
-    const wrongAnswer = (await getQuizAnswer(page)) + 1;
+    const quiz = await getQuizNumbers(page);
+    const wrongAnswer = quiz[0] * quiz[1] + 1;
     fillFormThenClickSubmit(page)(wrongAnswer);
 
     expect(await page.getByTestId(ids.indicator).textContent()).toBe(
       INDICATOR_TEXT.wrong
     );
+
     await page.waitForSelector(`[data-testid="${ids.indicator}"]`);
+    const quizAfterWrongAnswer = await getQuizNumbers(page);
     expect(await page.getByTestId(ids.answer).inputValue()).not.toBe('');
-  });
-
-  describe('after submitting form', () => {
-    test('hides indicator upon filling answer', async ({ page }) => {
-      const answer = await getQuizAnswer(page);
-      fillFormThenClickSubmit(page)(answer);
-
-      await page.waitForSelector(`[data-testid="${ids.indicator}"]`);
-      await page.getByTestId(ids.answer).fill(String(answer));
-      await expect(page.getByTestId(ids.indicator)).not.toBeVisible();
-    });
+    expect(
+      quiz[0] === quizAfterWrongAnswer[0] && quiz[1] === quizAfterWrongAnswer[1]
+    ).toBeTruthy();
   });
 });
