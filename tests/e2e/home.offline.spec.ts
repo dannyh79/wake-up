@@ -6,6 +6,8 @@ const { beforeEach, describe } = test;
 
 beforeEach(async ({ page }) => {
   await page.goto('/');
+  await page.context().setOffline(true);
+  await page.context().newPage();
 });
 
 describe('page layout', () => {
