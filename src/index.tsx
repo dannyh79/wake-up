@@ -11,18 +11,31 @@ const updateSW = registerSW({
     if (confirm('New content available. Reload?')) {
       updateSW(true);
     }
-  }
+  },
 });
 
-export function App() {
-  return (
-    <LocationProvider>
-      <Router>
-        <Route path="/" component={Home} />
-        <Route default component={NotFound} />
-      </Router>
-    </LocationProvider>
-  );
-}
+const Footer = () => (
+  <footer style="position: absolute; bottom: 8px">
+    See source code{' '}
+    <a
+      href="https://github.com/dannyh79/wake-up"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      here
+    </a>
+    . Internet required ;)
+  </footer>
+);
+
+export const App = () => (
+  <LocationProvider>
+    <Router>
+      <Route path="/" component={Home} />
+      <Route default component={NotFound} />
+    </Router>
+    <Footer />
+  </LocationProvider>
+);
 
 render(<App />, document.getElementById('app'));
