@@ -47,6 +47,7 @@ const AnswerForm = ({
     <input
       data-testid={ids.answer}
       type="text"
+      autocomplete="off"
       inputMode="numeric"
       id={ids.answer}
       value={form.answer}
