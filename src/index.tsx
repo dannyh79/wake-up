@@ -15,7 +15,7 @@ const updateSW = registerSW({
 });
 
 const Footer = () => (
-  <footer style="position: absolute; bottom: 8px">
+  <footer style="position: absolute; bottom: 2rem">
     See source code{' '}
     <a
       href="https://github.com/dannyh79/wake-up"
