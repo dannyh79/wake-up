@@ -28,6 +28,7 @@ module.exports = {
     'jsx-quotes': ['warn', 'prefer-double'],
     'max-lines': 0,
     'max-lines-per-function': 1,
+    'max-statements': 1,
     'multiline-comment-style': 0,
     'no-console': 1,
     'no-debugger': 1,
